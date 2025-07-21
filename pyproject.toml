@@ -1,0 +1,82 @@
+[project]
+name = "langchain_poc"
+version = "0.1.0"
+description = "LangChain poc for Rag Challenge"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "langchain",
+    "langchain-community",
+    "langchain-ollama",
+    "langchain-chroma",
+    "pydantic",
+    "fastapi",
+    "uvicorn",
+    "numpy",
+    "chromadb",
+    "python-dotenv",
+]
+
+[tool.black]
+line-length = 119
+exclude = "venv"
+
+[tool.flake8]
+docstring-convention = "all"
+ignore = ["D107", "D212", "E501", "W503", "W605", "D203", "D100"]
+exclude = ["venv"]
+max-line-length = 119
+
+# radon
+radon-max-cc = 10
+
+[tool.isort]
+profile = "black"
+multi_line_output = "VERTICAL_HANGING_INDENT"
+force_grid_wrap = 2
+line_length = 119
+
+[tool.pylint."messages control"]
+disable = [
+    "line-too-long",
+    "trailing-whitespace",
+    "missing-function-docstring",
+    "consider-using-f-string",
+    "import-error",
+    "too-few-public-methods",
+    "redefined-outer-name",
+]
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "I", "UP"]
+ignore = ["E501", "W292"]
+unfixable = ["ERA001"]
+
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401", "F403"]
+"**/{tests,docs,tools}/*" = ["E402"]
+
+[dependency-groups]
+dev = ["httpx>=0.28.1", "poethepoet>=0.36.0", "pytest>=8.4.1"]
+
+[tool.poe.tasks]
+serve = "uvicorn app.main:app --reload"
+lint = "pre-commit run --all-files"
+
+[tool.poe.tasks.update_embeddings]
+cmd = """
+curl -X POST http://127.0.0.1:8000/update-embeddings \
+-H "Content-Type: application/json" \
+-d '{}'
+"""
+
+[tool.poe.tasks.test_chat]
+cmd = """
+curl -X POST http://127.0.0.1:8000/chat \
+-H "Content-Type: application/json" \
+-d '{
+"question": "What is SageMaker?",
+"chat_history": []
+}'
+"""
